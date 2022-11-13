@@ -11,6 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\View\View;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  *
@@ -18,26 +21,43 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 class TemperatureController extends AbstractFOSRestController
 {
     /**
-     * @Rest\Get("/temperature", name="app_temperature")
+     * @Rest\Post("/temperature", name="post_app_temperature")
+     * @param Request $request
+     *
      * @return Response
      */
-    public function indexAction(TemperatureQueryManager  $temperatureQueryManager): Response
+    public function postTemperatureAction(Request $request, TemperatureQueryManager  $temperatureQueryManager): Response
     {
-        // return $this->json([
-        //     'message' => 'Welcome to your new controller!',
-        //     'path' => 'src/Controller/TemperatureController.php',
-        // ]);
+        try {
+            $uploadedFile = $request->files->get('myFile');
 
-        // return $this->view("Welcome to your new controller!", Response::HTTP_OK);
-       // return $this->view("hello", Response::HTTP_OK);
+            if (!$uploadedFile) {
+                return new Response("No file uploaded!!",  Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
 
-        // /** @var TemperatureQueryManager $temperatureQueryManager */
-        //  $temperatureQueryManager = $this->container->get('temperature_query_manager');
+            $response = $temperatureQueryManager->calculateMkt($uploadedFile, $request->getClientIp());
 
-         $response = $temperatureQueryManager->calculateMkt([]);
-        // var_dump($response);
-       // return new Response("Welcome to your new controller!!", Response::HTTP_OK);
-       return new Response(json_encode($response), Response::HTTP_OK);
+            return new Response(json_encode($response), Response::HTTP_OK);
+        } catch (\InvalidArgumentException $e) {
+            return new Response($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @Rest\Get("/temperature", name="get_app_temperature")
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public function getAction(Request $request, TemperatureQueryManager  $temperatureQueryManager): Response
+    {
+        try {
+            $response = $temperatureQueryManager->findTemperature($request->getClientIp());
+
+            return new Response(json_encode($response), Response::HTTP_OK);
+        } catch (\InvalidArgumentException $e) {
+            return new Response($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
     }
 
 

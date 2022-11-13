@@ -9,7 +9,6 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="temperature_query")
  * @ORM\Entity(repositoryClass=TemperatureQueryRepository::class)
  * @ORM\HasLifecycleCallbacks
- * @SWG\Definition(type="object", @SWG\Xml(name="TemperatureQuery"))
  */
 class TemperatureQuery
 {
@@ -26,7 +25,8 @@ class TemperatureQuery
     private $id;
 
     /**
-     * @ORM\Column(name="json_data", type="json_array", nullable=true)
+     * @var array
+     * @ORM\Column(name="json_data", type="json", nullable=true)
      */
     private $jsonData;
 
@@ -34,6 +34,11 @@ class TemperatureQuery
      * @ORM\Column(name="ip_address", type="string", length=50, nullable=true)
      */
     private $ipAddress;
+
+    /**@var float
+     * @ORM\Column(name="mkt", type="float", nullable=true)
+     */
+    private $mkt;
 
     /**
      * @var \DateTime
@@ -54,6 +59,7 @@ class TemperatureQuery
     {
         $this->setCreatedAt(new \DateTime());
         $this->setUpdatedAt(new \DateTime());
+        $this->setMkt(0.00);
     }
 
     /**
@@ -77,9 +83,29 @@ class TemperatureQuery
      *
      * @return $this
      */
-    public function setJsonData(?array $jsonData): self
+    public function setJsonData(?array $jsonData): TemperatureQuery
     {
         $this->jsonData = $jsonData;
+
+        return $this;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getMkt(): ?float
+    {
+        return $this->mkt;
+    }
+
+    /**
+     * @param float|null $mkt
+     *
+     * @return $this
+     */
+    public function setMkt(?float $mkt): TemperatureQuery
+    {
+        $this->mkt = $mkt;
 
         return $this;
     }
@@ -92,7 +118,12 @@ class TemperatureQuery
         return $this->ipAddress;
     }
 
-    public function setIpAddress(?string $ipAddress): self
+    /**
+     * @param string|null $ipAddress
+     *
+     * @return $this
+     */
+    public function setIpAddress(?string $ipAddress): TemperatureQuery
     {
         $this->ipAddress = $ipAddress;
 
@@ -112,7 +143,7 @@ class TemperatureQuery
      *
      * @return $this
      */
-    public function setCreatedAt(\DateTime $createdAt): self
+    public function setCreatedAt(\DateTime $createdAt): TemperatureQuery
     {
         $this->createdAt = $createdAt;
 
@@ -132,7 +163,7 @@ class TemperatureQuery
      *
      * @return $this
      */
-    public function setUpdatedAt(\DateTime $updatedAt): self
+    public function setUpdatedAt(\DateTime $updatedAt): TemperatureQuery
     {
         $this->updatedAt = $updatedAt;
 
